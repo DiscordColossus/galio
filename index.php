@@ -2,10 +2,11 @@
     <head>
     </head>
     <body>
+    
         <form action="" method="post" onsubmit="return addElements()">
             <input id="inputA" type="text">
             <input id="inputB" type="text">
-
+            aaa
             <button  type="submit" id ="add">Dodaj</button>
             <button id="stop">Wykonaj</button>
         </form>
