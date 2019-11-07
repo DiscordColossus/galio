@@ -1,14 +1,30 @@
 <?php
-    require_once('database.php');
     
-$send = 'a'.$_GET['send'];
-switch($send) {
-    case 'ateacher':
-        $db_conn = dbConnect($db_server,$db_name,$db_user,$db_pass);
-    break;
-}
+require_once('database.php');
 
+if(isset($_GET['send'])) {
+    $send = 'a'.$_GET['send'];
+    switch($send) {
+        case 'ateacher':
+            $data = [
+                'imie' => $_POST['imie'],
+                'nazwisko' => $_POST['nazwisko'],
+                'pesel' => $_POST['pesel']
+            ];
+            $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
+            $sql = 'insert into nauczyciele values (NULL, :imie, :nazwisko, :pesel)';
+            $db_stmt = $db_conn->prepare($sql);
+            $sb_stmt->execute($data);
+            $db_conn = null;
+            header('Location: index.php');
+        break;
+    }
+} 
+else {
+    echo 'index send nie istnieje!';
+}
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,31 +34,15 @@ switch($send) {
     <title>Document</title>
 </head>
 <body>
-    <form action="index.php?send=teacher" method="post" name="addTeacher"id="addTeacher">
-        <input type="text" name="imie" id="">
-        <input type="text" name="nazwisko" id="">
-        <input type="text" name="pesel" id="">
-        <input type="submit" value="">
-        
+    <form action="index.php?send=teacher" method="post" name="addTeacher">
+        <input type="text" name="imie">
+        <input type="text" name="nazwisko">
+        <input type="text" name="pesel">
+        <input type="submit" value="Dodaj">
     </form>
-</body>
-</html>
+    <div id="nauczyciele">
 <?php
-$db_server = 'localhost';
-$db_user = 'zsht';
-$db_pass = '1234';
-$db_name = 'zsht';
-
-function dbConnect($db_server,$db_name,$db_user,$db_pass){
-try {
-    $db_conn = new PDO('mysql:host='.$db_server.';dbname='.$db_name, $db_user, $db_pass);
-    $db_conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-} catch (PDOException $e){
-    echo $e->getMessage();
-}
-return $db_conn;
-}
-    
+$db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
     $db_query = $db_conn->query('select * from uczniowie');
     foreach($db_query as $row){
         echo'<div>';
@@ -57,5 +57,7 @@ return $db_conn;
         echo '</div>';
     }
 
-
 ?>
+    </div>
+</body>
+</html>
