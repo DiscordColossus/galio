@@ -1,7 +1,6 @@
 <?php
-    
+     
 require_once('database.php');
-
 if(isset($_GET['send'])) {
     $send = 'a'.$_GET['send'];
     switch($send) {
