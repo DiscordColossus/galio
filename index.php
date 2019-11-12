@@ -1,6 +1,10 @@
 <?php
-     
+
+
+
 require_once('database.php');
+include('functions.php');
+
 if(isset($_GET['send'])) {
     $send = 'a'.$_GET['send'];
     switch($send) {
@@ -26,15 +30,32 @@ if(isset($_GET['cmd'])) {
     $cmd = 'c'.$_GET['cmd'];
     switch($cmd) {
         case 'cupdate':
-            $data = [
-                'id' => $_GET['id']
-            ];
-            $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
-            $sql = 'select imie, nazwisko, pesel from nauczyciel where id =:id';
-            $db_stmt = $db_conn->prepare($sql);
-            $db_stmt->execute($data);
-            $teacher = $db_stmt->fetchAll();
-            $db_conn = null;
+            $method = $_SERVER['REQUEST_METHOD'];
+            if($method == 'POST') {
+                $data = [
+                    'imie' => $_POST['imie'],
+                    'nazwisko' => $_POST['nazwisko'],
+                    'pesel' => $_POST['pesel'],
+                    'id' => $_GET['id']
+                ];
+                $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
+                $sql = 'update nauczyciel set imie = :imie, nazwisko = :nazwisko, pesel = :pesel where id = :id';
+                $db_stmt = $db_conn->prepare($sql);
+                $db_stmt->execute($data);
+                $db_conn = null;
+                header('Location: index.php');
+            }
+            else {
+                $data = [
+                    'id' => $_GET['id']
+                ];
+                $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
+                $sql = 'select imie, nazwisko, pesel from nauczyciel where id =:id';
+                $db_stmt = $db_conn->prepare($sql);
+                $db_stmt->execute($data);
+                $teacher = $db_stmt->fetchAll();
+                $db_conn = null;
+            }
         break;
         case 'cdelete':
         break;
@@ -80,10 +101,10 @@ if(isset($_GET['cmd'])) {
     </style>
 </head>
 <body>
-    <form action="index.php?send=teacher" method="post" name="addTeacher">
+    <form action="<?= (isset($_GET['cmd']) && $_GET['cmd'] == 'update') ? ('index.php?cmd=update&amp;id='.getNum($_GET['id'])) : ('index.php?send=teacher') ?>" method="post" name="addTeacher">
         <input type="text" name="imie" value="<?= (isset($teacher[0]['imie'])) ? ($teacher[0]['imie']) : ('') ?>">
-        <input type="text" name="nazwisko">
-        <input type="text" name="pesel">
+        <input type="text" name="nazwisko" value="<?= (isset($teacher[0]['nazwisko'])) ? ($teacher[0]['nazwisko']) : ('') ?>">
+        <input type="text" name="pesel" value="<?= (isset($teacher[0]['pesel'])) ? ($teacher[0]['pesel']) : ('') ?>">
         <input type="submit" value="Dodaj">
     </form>
     <div id="nauczyciele">
