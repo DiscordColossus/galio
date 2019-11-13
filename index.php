@@ -1,7 +1,9 @@
 <?php
-
-
-
+/*
+Plik wymagany.
+Jeśli nie istnieje, wystąpi bład krytyczny.
+Serwer przerwie ładowanie strony.
+*/
 require_once('database.php');
 include('functions.php');
 
@@ -14,8 +16,8 @@ if(isset($_GET['send'])) {
                 'nazwisko' => $_POST['nazwisko'],
                 'pesel' => $_POST['pesel']
             ];
-            $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
-            $sql = 'insert into nauczyciel values (NULL, :imie, :nazwisko, :pesel)';
+            $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+            $sql = 'insert into nauczyciele values (NULL, :imie, :nazwisko, :pesel)';
             $db_stmt = $db_conn->prepare($sql);
             $db_stmt->execute($data);
             $db_conn = null;
@@ -24,7 +26,7 @@ if(isset($_GET['send'])) {
         default:
             echo 'Co robisz dzbanie!';
     }
-} 
+}
 
 if(isset($_GET['cmd'])) {
     $cmd = 'c'.$_GET['cmd'];
@@ -38,8 +40,8 @@ if(isset($_GET['cmd'])) {
                     'pesel' => $_POST['pesel'],
                     'id' => $_GET['id']
                 ];
-                $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
-                $sql = 'update nauczyciel set imie = :imie, nazwisko = :nazwisko, pesel = :pesel where id = :id';
+                $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+                $sql = 'update nauczyciele set imie = :imie, nazwisko = :nazwisko, pesel = :pesel where id = :id';
                 $db_stmt = $db_conn->prepare($sql);
                 $db_stmt->execute($data);
                 $db_conn = null;
@@ -49,8 +51,8 @@ if(isset($_GET['cmd'])) {
                 $data = [
                     'id' => $_GET['id']
                 ];
-                $db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
-                $sql = 'select imie, nazwisko, pesel from nauczyciel where id =:id';
+                $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+                $sql = 'select imie, nazwisko, pesel from nauczyciele where id = :id';
                 $db_stmt = $db_conn->prepare($sql);
                 $db_stmt->execute($data);
                 $teacher = $db_stmt->fetchAll();
@@ -63,9 +65,7 @@ if(isset($_GET['cmd'])) {
             echo 'Co robisz dzbanie!';
     }
 }
-
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,7 +90,7 @@ if(isset($_GET['cmd'])) {
         text-decoration: none;
         color: #000;
         cursor: default;
-        border: 1px solid #ccc;
+        border: 1px solid #eee;
         border-radius: 5px;
         padding: 10px;
         margin: 0 5px;
@@ -101,28 +101,29 @@ if(isset($_GET['cmd'])) {
     </style>
 </head>
 <body>
-    <form action="<?= (isset($_GET['cmd']) && $_GET['cmd'] == 'update') ? ('index.php?cmd=update&amp;id='.getNum($_GET['id'])) : ('index.php?send=teacher') ?>" method="post" name="addTeacher">
-        <input type="text" name="imie" value="<?= (isset($teacher[0]['imie'])) ? ($teacher[0]['imie']) : ('') ?>">
-        <input type="text" name="nazwisko" value="<?= (isset($teacher[0]['nazwisko'])) ? ($teacher[0]['nazwisko']) : ('') ?>">
-        <input type="text" name="pesel" value="<?= (isset($teacher[0]['pesel'])) ? ($teacher[0]['pesel']) : ('') ?>">
-        <input type="submit" value="Dodaj">
+    <form action="<?= (isset($_GET['cmd']) && $_GET['cmd'] == 'update') ? ('index.php?cmd=update&amp;id='.getNum($_GET['id'])) : ('index.php?send=teacher') ?>" method="post" name="addTeacher" id="addTeacher">
+        <input type="text" name="imie" value="<?= (isset($teacher[0]['imie'])) ? ($teacher[0]['imie']) : ('') ?>" id="">
+        <input type="text" name="nazwisko" value="<?= (isset($teacher[0]['nazwisko'])) ? ($teacher[0]['nazwisko']) : ('') ?>" id="">
+        <input type="text" name="pesel" value="<?= (isset($teacher[0]['pesel'])) ? ($teacher[0]['pesel']) : ('') ?>" id="">
+        <input type="submit" value="Zapisz">
     </form>
-    <div id="nauczyciele">
+    <div class="list" id="nauczyciele">
+        <div class="title">Nauczyciele</div>
 <?php
-$db_conn = dbConnect($db_server, $db_name, $db_pass, $db_user);
-    $db_query = $db_conn->query('select * from nauczyciel');
-    foreach($db_query as $row){
+$db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+$db_query = $db_conn->query('select * from nauczyciele');
+foreach($db_query as $row) {
 ?>
         <div class="content">
-            <div><?= $row['imie']?></div>
-            <div><?= $row['nazwisko']?></div>
-            <div><?= $row['pesel']?></div>
+            <div><?= $row['imie'] ?></div>
+            <div><?= $row['nazwisko'] ?></div>
+            <div><?= $row['pesel'] ?></div>
             <div>
                 <a href="index.php?cmd=update&amp;id=<?= $row['id'] ?>">Edytuj</a>
                 <a href="index.php?cmd=delete&amp;id=<?= $row['id'] ?>">Usuń</a>
             </div>
         </div>
-<?php 
+<?php
 }
 ?>
     </div>
