@@ -25,17 +25,35 @@ if(isset($_GET['send'])) {
         break;
         case 'aeducator':
             $data = [
-                'pelna_nazwa' => $_POST['pelna_nazwa'],
-                'skrot' => $_POST['skrot'],
-                'rocznik' => $_POST['rocznik'],
-                'wychowawca' => $_POST['wychowawca']
+                'nauczyciel' => $_POST['wychowawca']
             ];
             $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
-            $sql = 'insert into klasy values (NULL, :pelna_nazwa, :skrot, :rocznik, :wychowawca)';
+            $sql = 'select * from wychowawcy where nauczyciel = :nauczyciel';
             $db_stmt = $db_conn->prepare($sql);
             $db_stmt->execute($data);
+            $wych = $db_stmt->fetchAll();
+            var_dump($wych);
             $db_conn = null;
-            header('Location: index.php');
+            if(count($wych) == 0) {
+                $data = [
+                    'pelna_nazwa' => $_POST['pelna_nazwa'],
+                    'skrot' => $_POST['skrot'],
+                    'rocznik' => $_POST['rocznik'],
+                    'wychowawca' => $_POST['wychowawca']
+                ];
+                $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+                $sql = 'insert into klasy values(NULL, :pelna_nazwa, :skrot, :rocznik, :wychowawca)';
+                $db_stmt = $db_conn->prepare($sql);
+                $db_stmt->execute($data);
+                $id = $db_conn->lastInsertId();
+                $data = [
+                    'nauczyciel' => $_POST['wychowawca'],
+                    'klasa' => $id
+                ];
+                $sql = 'insert into wychowawcy values(NULL, :nauczyciel, :klasa)';
+                $db_conn = null;
+                //header('Location: index.php');
+            }
         break;
         default:
             echo 'Co robisz dzbanie!';
@@ -149,8 +167,8 @@ foreach($db_query as $row) {
 }
 ?>
     </div>
-    <div class="list" id="wychowawcy">
-        <div class="title">Wychowawcy</div>
+    <div class="list" id="klasy">
+        <div class="title">Klasy</div>
         <form action="index.php?send=educator" method="post">
             <input name="pelna_nazwa" type="text">
             <input name="skrot" type="text">
@@ -159,7 +177,7 @@ foreach($db_query as $row) {
                 <option value=""></option>
 <?php
 $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
-$db_query = $db_conn->query('select * from nauczyciele');
+$db_query = $db_conn->query('select * from nauczyciele n, wychowawcy w where n.id != w.nauczyciel');
 foreach($db_query as $row) {
 ?>
                 <option value="<?= $row['id'] ?>"><?= $row['imie'].' '.$row['nazwisko'] ?></option>
