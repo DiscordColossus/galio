@@ -23,6 +23,20 @@ if(isset($_GET['send'])) {
             $db_conn = null;
             header('Location: index.php');
         break;
+        case 'aeducator':
+            $data = [
+                'pelna_nazwa' => $_POST['pelna_nazwa'],
+                'skrot' => $_POST['skrot'],
+                'rocznik' => $_POST['rocznik'],
+                'wychowawca' => $_POST['wychowawca']
+            ];
+            $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+            $sql = 'insert into klasy values (NULL, :pelna_nazwa, :skrot, :rocznik, :wychowawca)';
+            $db_stmt = $db_conn->prepare($sql);
+            $db_stmt->execute($data);
+            $db_conn = null;
+            header('Location: index.php');
+        break;
         default:
             echo 'Co robisz dzbanie!';
     }
@@ -60,6 +74,14 @@ if(isset($_GET['cmd'])) {
             }
         break;
         case 'cdelete':
+            $data = [
+                'id' => $_GET['id']
+            ];
+            $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+            $sql = 'delete from nauczyciele where id = :id';
+            $db_stmt = $db_conn->prepare($sql);
+            $db_stmt->execute($data);
+            $db_conn = null;
         break;
         default:
             echo 'Co robisz dzbanie!';
@@ -101,14 +123,14 @@ if(isset($_GET['cmd'])) {
     </style>
 </head>
 <body>
-    <form action="<?= (isset($_GET['cmd']) && $_GET['cmd'] == 'update') ? ('index.php?cmd=update&amp;id='.getNum($_GET['id'])) : ('index.php?send=teacher') ?>" method="post" name="addTeacher" id="addTeacher">
-        <input type="text" name="imie" value="<?= (isset($teacher[0]['imie'])) ? ($teacher[0]['imie']) : ('') ?>" id="">
-        <input type="text" name="nazwisko" value="<?= (isset($teacher[0]['nazwisko'])) ? ($teacher[0]['nazwisko']) : ('') ?>" id="">
-        <input type="text" name="pesel" value="<?= (isset($teacher[0]['pesel'])) ? ($teacher[0]['pesel']) : ('') ?>" id="">
-        <input type="submit" value="Zapisz">
-    </form>
     <div class="list" id="nauczyciele">
         <div class="title">Nauczyciele</div>
+            <form action="<?= (isset($_GET['cmd']) && $_GET['cmd'] == 'update') ? ('index.php?cmd=update&amp;id='.getNum($_GET['id'])) : ('index.php?send=teacher') ?>" method="post" name="addTeacher" id="addTeacher">
+                <input type="text" name="imie" value="<?= (isset($teacher[0]['imie'])) ? ($teacher[0]['imie']) : ('') ?>" id="">
+                <input type="text" name="nazwisko" value="<?= (isset($teacher[0]['nazwisko'])) ? ($teacher[0]['nazwisko']) : ('') ?>" id="">
+                <input type="text" name="pesel" value="<?= (isset($teacher[0]['pesel'])) ? ($teacher[0]['pesel']) : ('') ?>" id="">
+                <input type="submit" value="Zapisz">
+            </form>
 <?php
 $db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
 $db_query = $db_conn->query('select * from nauczyciele');
@@ -118,6 +140,45 @@ foreach($db_query as $row) {
             <div><?= $row['imie'] ?></div>
             <div><?= $row['nazwisko'] ?></div>
             <div><?= $row['pesel'] ?></div>
+            <div>
+                <a href="index.php?cmd=update&amp;id=<?= $row['id'] ?>">Edytuj</a>
+                <a href="index.php?cmd=delete&amp;id=<?= $row['id'] ?>">Usuń</a>
+            </div>
+        </div>
+<?php
+}
+?>
+    </div>
+    <div class="list" id="wychowawcy">
+        <div class="title">Wychowawcy</div>
+        <form action="index.php?send=educator" method="post">
+            <input name="pelna_nazwa" type="text">
+            <input name="skrot" type="text">
+            <input name="rocznik" type="text">
+            <select name="wychowawca" id="wychowawca">
+                <option value=""></option>
+<?php
+$db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+$db_query = $db_conn->query('select * from nauczyciele');
+foreach($db_query as $row) {
+?>
+                <option value="<?= $row['id'] ?>"><?= $row['imie'].' '.$row['nazwisko'] ?></option>
+<?php
+}
+?>
+            </select>
+            <input type="submit" value="Zapisz">
+        </form>
+<?php
+$db_conn = dbConnect($db_server, $db_name, $db_user,$db_pass);
+$db_query = $db_conn->query('select * from klasy k, nauczyciele n where n.id = k.wychowawca');
+foreach($db_query as $row) {
+?>
+        <div class="content">
+            <div><?= $row['pelna_nazwa'] ?></div>
+            <div><?= $row['skrot'] ?></div>
+            <div><?= $row['rocznik'] ?></div>
+            <div><?= $row['imie'].' '.$row['nazwisko'] ?></div>
             <div>
                 <a href="index.php?cmd=update&amp;id=<?= $row['id'] ?>">Edytuj</a>
                 <a href="index.php?cmd=delete&amp;id=<?= $row['id'] ?>">Usuń</a>
