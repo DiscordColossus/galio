@@ -1,0 +1,24 @@
+.list .title {
+    font-weight: bold;
+    padding: 15px;
+}
+.content div {
+    display: inline-block;
+    width: 15%;
+    padding: 15px;
+}
+.content:hover {
+    background-color: #ddd;
+}
+.content div a {
+    text-decoration: none;
+    color: #000;
+    cursor: default;
+    border: 1px solid #eee;
+    border-radius: 5px;
+    padding: 10px;
+    margin: 0 5px;
+}
+.content div a:hover {
+    background-color: #fcc;
+}
