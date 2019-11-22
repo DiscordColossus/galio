@@ -56,10 +56,15 @@ $db_conn = null;
                 <option value=""></option>
 <?php
 $db_conn = dbConnect();
-$db_query = $db_conn->query('select n.id, n.imie, n.nazwisko from nauczyciele n where n.id not in (select nauczyciel from wychowawcy)');
+
+if(isset($educator[0]['wychowawca']))
+    $ed = $educator[0]['wychowawca'];
+else
+    $ed = 0;
+$db_query = $db_conn->query('select n.id, n.imie, n.nazwisko from nauczyciele n where n.id = ".$ed" or n.id not in (select nauczyciel from wychowawcy)');
 foreach($db_query as $row) {
 ?>
-                <option value="<?= $row['id'] ?>"><?= $row['imie'].' '.$row['nazwisko'] ?></option>
+                <option value="<?= $row['id'] ?>"<?php if($row['id'] == $educator[0]['wychowawca']) { ?> selected <?php } ?>><?= $row['imie'].' '.$row['nazwisko'] ?></option>
 <?php
 $db_conn = null;
 }
