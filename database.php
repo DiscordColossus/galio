@@ -22,7 +22,7 @@ function dbConnect() {
          * 
          * Domyślnie, jak w naszym przypadku serwer baz danych jest uruchomiony na tej samej maszynie, na której tworzymy stronę. W takim przypadku należy w parametrze host wpisać "localhost". W innym przypadku będzie to dokładny adres serwera baz danych.
          * W parametrze dbname wprowadzamy dokładną nazwę bazy danych, jaką utworzyliśmy (lub została nam przyznana przez administratora serwera).
-         * Dodakowym parametrem jest być port, gdzie wprowadzimy port na serwerze, który odpowiada na żądania kierowane do serwera baz danych. Domyślnym portem dla MySQL jest 3306, natomiast MariaDB - 3307. Parametr "port" wprowadzamy jedynie wtedy, kiedy te wartości są ustawione inaczej.
+         * Dodatkowym parametrem jest być port, gdzie wprowadzimy port na serwerze, który odpowiada na żądania kierowane do serwera baz danych. Domyślnym portem dla MySQL jest 3306, natomiast MariaDB - 3307. Parametr "port" wprowadzamy jedynie wtedy, kiedy te wartości są ustawione inaczej.
          * 
          * @param string $username
          * W ten parametr należy wpisać nazwę użytkownika, który ma dostęp do bazy danych.
