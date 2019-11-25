@@ -64,6 +64,37 @@ function getSend($send) {
                     }
                 }
             break;
+            case 'astudent':
+                if(isset($_GET['cmd']))
+                    return aStudent($_GET['cmd']);
+                else {
+                    $data = [
+                        'nauczyciel' => $_POST['wychowawca'],
+                        'skrot' => $_POST['klasa']
+                    ];
+                    $db_conn = dbConnect();
+                    $sql = 'select * from klasy where wychowawca = :nauczyciel';
+                    $db_stmt = $db_conn->prepare($sql);
+                    $db_stmt->execute($data);
+                    $class = $db_stmt->fetchAll();
+                    $db_conn = null;
+                    if(count($class) == 0) {
+                        $data = [
+                            'imie' => $_POST['imie'],
+                            'nazwisko' => $_POST['nazwisko'],
+                            'pesel' => $_POST['pesel'],
+                            'klasa' => $_POST['klasa'],
+                            'wychowawca' => $_POST['wychowawca']
+                        ];
+                        $db_conn = dbConnect();
+                        $sql = 'insert into uczniowie values (NULL, :imie, :nazwisko, :pesel, :klasa, :wychowawca)';
+                        $db_stmt = $db_conn->prepare($sql);
+                        $db_stmt->execute($data);
+                        $db_conn = null;
+                        header('Location: index.php');
+                    }
+                }
+            break;
             default:
                 echo 'Co robisz dzbanie!';
         }
@@ -87,7 +118,7 @@ function aTeacher($cmd) {
                     $db_stmt = $db_conn->prepare($sql);
                     $db_stmt->execute($data);
                     $db_conn = null;
-                    header('Location: index.php');
+                    //header('Location: index.php');
                 }
                 else {
                     $data = [
@@ -99,6 +130,7 @@ function aTeacher($cmd) {
                     $db_stmt->execute($data);
                     return $db_stmt->fetchAll();
                     $db_conn = null;
+                    header('Location: index.php');
                 }
             break;
             case 'cdelete':
@@ -110,6 +142,7 @@ function aTeacher($cmd) {
                 $db_stmt = $db_conn->prepare($sql);
                 $db_stmt->execute($data);
                 $db_conn = null;
+                header('Location: index.php');
             break;
             default:
                 echo 'Co robisz dzbanie!';
@@ -136,7 +169,6 @@ function aEducator($cmd) {
                     $db_stmt = $db_conn->prepare($sql);
                     $db_stmt->execute($data);
                     $db_conn = null;
-                    header('Location: index.php');
                 }
                 else {
                     $data = [
@@ -148,6 +180,7 @@ function aEducator($cmd) {
                     $db_stmt->execute($data);
                     return $db_stmt->fetchAll();
                     $db_conn = null;
+                    header('Location: index.php');
                 }
             break;
             case 'cdelete':
@@ -155,10 +188,65 @@ function aEducator($cmd) {
                     'id' => $_GET['id']
                 ];
                 $db_conn = dbConnect();
-                $sql = 'delete from nauczyciele where id = :id';
+                $sql = 'delete from klasy where id = :id';
+                $db_stmt = $db_conn->prepare($sql);
+                $db_stmt->execute($data);
+
+                $sql = 'delete from wychowawcy where klasa = :id';
                 $db_stmt = $db_conn->prepare($sql);
                 $db_stmt->execute($data);
                 $db_conn = null;
+                header('Location: index.php');
+            break;
+            default:
+                echo 'Co robisz dzbanie!';
+        }
+    }
+}
+
+
+function aStudent($cmd) {
+    if(isset($cmd)) {
+        $cmd = 'c'.$cmd;
+        switch($cmd) {
+            case 'cupdate':
+                $method = $_SERVER['REQUEST_METHOD'];
+                if($method == 'POST') {
+                    $data = [
+                        'imie' => $_POST['imie'],
+                        'nazwisko' => $_POST['nazwisko'],
+                        'pesel' => $_POST['pesel'],
+                        'id' => $_GET['id']
+                    ];
+                    $db_conn = dbConnect();
+                    $sql = 'update uczniowie set imie = :imie, nazwisko = :nazwisko, pesel = :pesel, where id = :id';
+                    $db_stmt = $db_conn->prepare($sql);
+                    $db_stmt->execute($data);
+                    $db_conn = null;
+                }
+                else {
+                    $data = [
+                        'id' => $_GET['id']
+                    ];
+                    $db_conn = dbConnect();
+                    $sql = 'select imie, nazwisko, pesel from uczniowie where id = :id';
+                    $db_stmt = $db_conn->prepare($sql);
+                    $db_stmt->execute($data);
+                    return $db_stmt->fetchAll();
+                    $db_conn = null;
+                    header('Location: index.php');
+                }
+            break;
+            case 'cdelete':
+                $data = [
+                    'id' => $_GET['id']
+                ];
+                $db_conn = dbConnect();
+                $sql = 'delete from uczniowie where id = :id';
+                $db_stmt = $db_conn->prepare($sql);
+                $db_stmt->execute($data);
+                $db_conn = null;
+                header('Location: index.php');
             break;
             default:
                 echo 'Co robisz dzbanie!';
